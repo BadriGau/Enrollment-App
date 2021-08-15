@@ -7,12 +7,12 @@ def index():
 
 @app.route("/courses")
 def courses():
-    return "<p>courses</p>"
+    return render_template("courses.html",login=False)
 
 @app.route("/register")
 def register():
-    return "<p>courses</p>"
+    return render_template("register.html",login=False)
 
 @app.route("/login")
 def login():
-    return "<p>courses</p>"
+    return render_template("login.html",login=False)
