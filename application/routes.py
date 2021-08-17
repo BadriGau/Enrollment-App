@@ -5,11 +5,12 @@ from flask import render_template,url_for
 def index():
     return render_template("index.html",index=True)
 
-@app.route("/courses")
-def courses():
+@app.route("/courses/")
+@app.route("/courses/<term>")
+def courses(term="Spring 2019"):
     courseData = [{"courseID":"1","title":"PHP","description":"Web development with php","credits":"4","term":"Spring"},
                   {"courseID":"2","title":"Python","description":"Web development with Python","credits":"5","term":"Summer"}]
-    return render_template("courses.html",courseData=courseData,courses=True)
+    return render_template("courses.html",courseData=courseData,courses=True,term=term)
 
 @app.route("/register")
 def register():
