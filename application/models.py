@@ -1,7 +1,7 @@
 from flask import Flask
 from application import db
 class User(db.Document):
-    id = db.IntField( unique=True )
+    user_id = db.IntField( unique=True )
     first_name = db.StringField( max_length=50 )
     last_name = db.StringField( max_length=50 )
     email = db.StringField( max_length=30 )
@@ -15,5 +15,5 @@ class Course(db.Document):
     term = db.StringField( max_length=25 )
     
 class Enrollment(db.Document):
-    id = db.IntField()
+    user_id = db.IntField()
     course_id = db.StringField( max_length=10 )
