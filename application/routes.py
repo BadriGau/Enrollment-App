@@ -1,3 +1,4 @@
+from application.forms import LoginForm,RegisterForm
 from enum import unique
 from flask.wrappers import Response
 from application import app,db
@@ -20,9 +21,10 @@ def courses(term="Spring 2019"):
 def register():
     return render_template("register.html",register=True)
 
-@app.route("/login")
+@app.route("/login",methods=['GET','POST'])
 def login():
-    return render_template("login.html",login=True)
+    form = LoginForm()
+    return render_template("login.html",form=form,title="Login",login=True)
 
 @app.route("/enrollment",methods=["GET","POST"])
 def enrollment():
