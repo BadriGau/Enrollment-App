@@ -1,9 +1,7 @@
 from application.forms import LoginForm,RegisterForm
-from enum import unique
-from flask.wrappers import Response
 from application import app,db
 from application.models import User,Course,Enrollment
-from flask import render_template,url_for,request,json
+from flask import render_template,url_for,request,json,Response,redirect,flash
 
 courseData = [{"courseID":"1","title":"PHP","description":"Web development with php","credits":"4","term":"Spring"},
               {"courseID":"2","title":"Python","description":"Web development with Python","credits":"5","term":"Summer"}]
@@ -24,7 +22,13 @@ def register():
 @app.route("/login",methods=['GET','POST'])
 def login():
     form = LoginForm()
-    return render_template("login.html",form=form,title="Login",login=True)
+    if form.validate_on_submit():
+        if request.form.get("email") == "bad@gmail.com":
+            flash("You are successfully logged in!!","success")
+            return redirect("/index")
+        else:
+            flash("Sorry, Something went wrong!!","danger")
+    return render_template("login.html",form=form,title="Login")
 
 @app.route("/enrollment",methods=["GET","POST"])
 def enrollment():
