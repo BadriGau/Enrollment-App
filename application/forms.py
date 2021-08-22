@@ -13,10 +13,10 @@ class LoginForm(FlaskForm):
 class RegisterForm(FlaskForm):
     email = StringField("Email",validators=[DataRequired(),Email()])
     password = PasswordField("Password",validators=[DataRequired(),Length(min=6,max=15)])
-    password_confirm = PasswordField("Confirm Password",validators=[DataRequired(),Length(min=6,max=15),EqualTo(password)])
+    password_confirm = PasswordField("Confirm Password",validators=[DataRequired(),Length(min=6,max=15),EqualTo('password')])
     first_name = StringField("First Name",validators=[DataRequired(),Length(min=3,max=50)])
     last_name = StringField("Last Name",validators=[DataRequired(),Length(min=3,max=50)])
-    submit = SubmitField("Login")
+    submit = SubmitField("Register")
     
     
     def validate_email(self, email):

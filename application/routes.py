@@ -12,12 +12,28 @@ def index():
 
 @app.route("/courses/")
 @app.route("/courses/<term>")
-def courses(term="Spring 2019"):
-    return render_template("courses.html",courseData=courseData,courses=True,term=term)
+def courses(term=None):
+    if term is None:
+        term="Spring 2019"
+    classes = Course.objects.all()
+    return render_template("courses.html",courseData=classes,courses=True,term=term)
 
-@app.route("/register")
+@app.route("/register",methods=['GET','POST'])
 def register():
     form = RegisterForm()
+    if form.validate_on_submit():
+        user_id = User.objects.count()
+        user_id += 1
+        email = form.email.data
+        password = form.password.data
+        first_name = form.first_name.data
+        last_name  = form.last_name.data
+        
+        user = User(user_id=user_id,email=email,first_name=first_name,last_name=last_name)
+        user.set_password(password)
+        user.save()
+        flash("You are successfully registered !","success")
+        return redirect(url_for('index'))
     return render_template("register.html", form=form,title="New User Registration",register=True)
 
 @app.route("/login",methods=['GET','POST'])
