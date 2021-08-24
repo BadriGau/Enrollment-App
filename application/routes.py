@@ -1,7 +1,7 @@
 from application.forms import LoginForm,RegisterForm
 from application import app,db
 from application.models import User,Course,Enrollment
-from flask import render_template,url_for,request,json,Response,redirect,flash
+from flask import render_template,url_for,request,json,Response,redirect,flash,session
 
 courseData = [{"courseID":"1","title":"PHP","description":"Web development with php","credits":"4","term":"Spring"},
               {"courseID":"2","title":"Python","description":"Web development with Python","credits":"5","term":"Summer"}]
@@ -20,6 +20,8 @@ def courses(term=None):
 
 @app.route("/register",methods=['GET','POST'])
 def register():
+    if session.get('username'):
+        return redirect(url_for('index'))
     form = RegisterForm()
     if form.validate_on_submit():
         user_id = User.objects.count()
@@ -38,6 +40,8 @@ def register():
 
 @app.route("/login",methods=['GET','POST'])
 def login():
+    if session.get('username'):
+        return redirect(url_for('index'))
     form = LoginForm()
     if form.validate_on_submit():
         email = form.email.data
@@ -46,17 +50,28 @@ def login():
         user = User.objects(email=email).first()
         if user and user.get_password(password):
             flash(f"{user.first_name},You are successfully logged in!!","success")
+            session['user_id'] = user.user_id
+            session['username'] = user.first_name
             return redirect("/index")
         else:
             flash("Sorry, Something went wrong!!","danger")
     return render_template("login.html",form=form,title="Login")
 
+@app.route("/logout")
+def logout():
+    session['user_id'] = False
+    session.pop('username',None)
+    return redirect(url_for('index'))
+    
 
 @app.route("/enrollment",methods=["GET","POST"])
 def enrollment():
+    if not session.get('username'):
+        return redirect(url_for('login'))
+    
     courseID = request.form.get('courseID')
     courseTitle = request.form.get('title')
-    user_id = 1
+    user_id = session.get('user_id')
     if courseID:
         if Enrollment.objects(user_id=user_id,courseID=courseID):
             flash(f"You are already enrolled in this course{courseTitle}!","danger")
