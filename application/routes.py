@@ -1,10 +1,28 @@
 from application.forms import LoginForm,RegisterForm
-from application import app,db
+from application import app,db,api
 from application.models import User,Course,Enrollment
-from flask import render_template,url_for,request,json,Response,redirect,flash,session
+from flask import render_template,url_for,request,json,jsonify,Response,redirect,flash,session
+from flask_restx import Resource
 
 courseData = [{"courseID":"1","title":"PHP","description":"Web development with php","credits":"4","term":"Spring"},
               {"courseID":"2","title":"Python","description":"Web development with Python","credits":"5","term":"Summer"}]
+##############################################
+    
+@api.route('/api','/api/')
+class GetUpdateDelete(Resource):
+    def get(self):
+        return jsonify(User.objects.all())
+
+@api.route('/api/<idx>')
+class GetAndPost(Resource):
+    def get(self,idx):
+        return jsonify(User.objects(user_id=idx))
+
+
+
+
+##############################################
+
 @app.route("/")
 @app.route("/index")
 def index():
