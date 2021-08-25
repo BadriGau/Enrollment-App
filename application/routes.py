@@ -1,8 +1,10 @@
+from application.course_db import course_list
 from application.forms import LoginForm,RegisterForm
 from application import app,db,api
 from application.models import User,Course,Enrollment
 from flask import render_template,url_for,request,json,jsonify,Response,redirect,flash,session
 from flask_restx import Resource
+from application.course_db import course_list
 
 courseData = [{"courseID":"1","title":"PHP","description":"Web development with php","credits":"4","term":"Spring"},
               {"courseID":"2","title":"Python","description":"Web development with Python","credits":"5","term":"Summer"}]
@@ -10,13 +12,35 @@ courseData = [{"courseID":"1","title":"PHP","description":"Web development with 
     
 @api.route('/api','/api/')
 class GetUpdateDelete(Resource):
+    #GET all
     def get(self):
         return jsonify(User.objects.all())
+    
+    def post(self):
+        data = api.payload
+        if not data:
+            print('Not a valid task!') 
+        user = User(user_id=data['user_id'],email=data['email'],first_name=data['first_name'],last_name=data['last_name'])
+        user.set_password(data['password'])
+        user.save()
+        return jsonify(User.objects(user_id=data['user_id']))
 
 @api.route('/api/<idx>')
 class GetAndPost(Resource):
+    #GET one
     def get(self,idx):
         return jsonify(User.objects(user_id=idx))
+    
+    #PUT
+    def put(self,idx):
+        data = api.payload
+        User.objects(user_id=idx).update(**data)
+        return jsonify(User.objects(user_id=idx))
+    #Delete
+    def delete(self,idx):
+        User.objects(user_id=idx).delete()
+        return jsonify("User has deleted")
+        
 
 
 
@@ -97,64 +121,21 @@ def enrollment():
         else:
             Enrollment(user_id=user_id,courseID=courseID).save()
             flash(f"You are enrolled in this course{courseTitle}!","success")
-    classes = list( User.objects.aggregate(*[
-            {
-                '$lookup': {
-                    'from': 'enrollment', 
-                    'localField': 'user_id', 
-                    'foreignField': 'user_id', 
-                    'as': 'r1'
-                }
-            }, {
-                '$lookup': {
-                    'from': 'course', 
-                    'localField': 'r1_courseID', 
-                    'foreignField': 'courseID', 
-                    'as': 'r2'
-                }
-            }, {
-                '$unwind': {
-                    'path': '$r1', 
-                    'includeArrayIndex': 'r1_id', 
-                    'preserveNullAndEmptyArrays': False
-                }
-            }, {
-                '$lookup': {
-                    'from': 'course', 
-                    'localField': 'r1.courseID', 
-                    'foreignField': 'courseID', 
-                    'as': 'r2'
-                }
-            }, {
-                '$unwind': {
-                    'path': '$r2', 
-                    'preserveNullAndEmptyArrays': False
-                }
-            }, {
-                '$match': {
-                    'user_id': user_id
-                }
-            }, {
-                '$sort': {
-                    'courseID': 1
-                }
-            }
-        ]))
-    
+    classes=course_list()
     return render_template("enrollment.html",title="Enrollment",classes=classes)
 
 
 
 
-@app.route("/api/")
-@app.route("/api/<idx>")
-def api(idx=None):
-    if(idx==None):
-        jdata = courseData
-    else:
-        jdata = courseData[int(idx)]
+# @app.route("/api/")
+# @app.route("/api/<idx>")
+# def api(idx=None):
+#     if(idx==None):
+#         jdata = courseData
+#     else:
+#         jdata = courseData[int(idx)]
         
-    return Response(json.dumps(jdata), mimetype="application/json")
+#     return Response(json.dumps(jdata), mimetype="application/json")
   
 @app.route("/user")
 def user():
